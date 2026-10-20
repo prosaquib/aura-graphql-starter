@@ -1,0 +1,59 @@
+scalar DateTime
+
+type Query {
+  product(id: ID!): Product
+  searchProducts(query: String!, limit: Int = 10): [Product!]!
+  order(id: ID!): Order
+}
+
+type Product {
+  id: ID!
+  name: String!
+  description: String!
+  price: Money!
+  ragInsights(question: String!): ProductInsight!
+}
+
+type ProductInsight {
+  answer: String!
+  sources: [String!]!
+  mock: Boolean!
+}
+
+type Order {
+  id: ID!
+  status: OrderStatus!
+  estimatedDelivery: String!
+  items: [OrderItem!]!
+  progressSummary: String
+  shippingPrediction: ShippingPrediction
+}
+
+type OrderItem {
+  productId: ID!
+  quantity: Int!
+  product: Product
+}
+
+type ShippingPrediction {
+  delayLikely: Boolean!
+  estimatedDelayDays: Int!
+  explanation: String!
+  generatedAt: DateTime!
+  mock: Boolean!
+}
+
+type Money {
+  amount: Float!
+  currency: String!
+}
+
+enum OrderStatus {
+  PLACED
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}

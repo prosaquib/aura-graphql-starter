@@ -1,0 +1,12 @@
+{
+  "name": "aura-graphql-starter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Aura schema-first NestJS GraphQL gateway and mock downstream services",
+  "scripts": {
+    "build:gateway": "npm --prefix apps/gateway run build",
+    "build:orders": "npm --prefix apps/orders run build",
+    "build:products": "npm --prefix apps/products run build",
+    "build:ai-lens": "npm --prefix apps/ai-lens run build"
+  }
+}

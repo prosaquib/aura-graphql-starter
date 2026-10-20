@@ -1,0 +1,86 @@
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: apps/gateway/Dockerfile
+    environment:
+      PORT: 4000
+      ORDERS_URL: http://orders:4101
+      PRODUCTS_URL: http://products:4102
+      AI_LENS_URL: http://ai-lens:4103
+      REDIS_URL: redis://redis:6379
+      AI_CACHE_TTL_SECONDS: 60
+    ports:
+      - "4000:4000"
+    depends_on:
+      orders:
+        condition: service_healthy
+      products:
+        condition: service_healthy
+      ai-lens:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  orders:
+    build:
+      context: .
+      dockerfile: apps/orders/Dockerfile
+    environment:
+      PORT: 4101
+    expose:
+      - "4101"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4101/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  products:
+    build:
+      context: .
+      dockerfile: apps/products/Dockerfile
+    environment:
+      PORT: 4102
+    expose:
+      - "4102"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4102/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  ai-lens:
+    build:
+      context: .
+      dockerfile: apps/ai-lens/Dockerfile
+    environment:
+      PORT: 4103
+    expose:
+      - "4103"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4103/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - aura-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  aura-redis-data:
